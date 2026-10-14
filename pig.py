@@ -1,63 +1,104 @@
-
-# Name: Mariem Cisse
-# Course: IS 211
-# Assignment: 7 - Pig Game
-
 import random
 
+random.seed(0)
 
 class Player:
-def __init__(self, name):
-self.name = name
-self.score = 0
+    """Represent a human player."""
+
+    def __init__(self, name):
+        self.name = name
+        self.score = 0
+
+    def add_points(self, points):
+        self.score += points
+
+
+class Die:
+    """Represent a six-sided die."""
+
+    def roll(self):
+        return random.randint(1, 6)
 
 
 class PigGame:
-def __init__(self):
-self.players = [Player("Player 1"), Player("Player 2")]
+    """Manage a two-player game of Pig."""
 
-def play(self):
-print("Welcome to the Pig Game!")
-current = 0
+    def __init__(self):
+        self.players = [
+            Player(input("Enter the name of Player 1: ")),
+            Player(input("Enter the name of Player 2: "))
+        ]
+        self.die = Die()
+        self.winning_score = 100
 
-while True:
-player = self.players[current]
-turn_total = 0
-print(f"\n{player.name}'s turn. Score: {player.score}")
+    def play_turn(self, player):
+        turn_total = 0
+        last_roll = None
 
-while True:
-choice = input("Roll or hold? (r/h): ").lower().strip()
+        print(f"\nIt is {player.name}'s turn!")
 
-if choice == "h":
-player.score += turn_total
-break
-elif choice == "r":
-roll = random.randint(1, 6)
-print("You rolled:", roll)
+        while True:
+            if last_roll is None:
+                print("Last roll: None yet")
+            else:
+                print(f"Last roll: {last_roll}")
 
-if roll == 1:
-turn_total = 0
-print("Turn over!")
-break
+            print(f"Turn total: {turn_total}")
+            print(f"Total game score: {player.score}")
 
-turn_total += roll
-print("Turn total:", turn_total)
+            choice = input("Enter 'r' to roll or 'h' to hold: ")
+            choice = choice.lower().strip()
 
-if player.score + turn_total >= 100:
-player.score += turn_total
-print(f"{player.name} wins with {player.score} points!")
-return
-else:
-print("Enter r to roll or h to hold.")
+            if choice == "r":
+                last_roll = self.die.roll()
+                print(f"{player.name} rolled a {last_roll}.")
 
-if player.score >= 100:
-print(f"{player.name} wins!")
-return
+                if last_roll == 1:
+                    print("You rolled a 1. No points are added.")
+                    print(f"{player.name}'s turn is over.")
+                    return False
 
-print("Scores:", self.players[0].score, "-", self.players[1].score)
-current = (current + 1) % 2
+                turn_total += last_roll
+
+            elif choice == "h":
+                player.add_points(turn_total)
+                print(f"{player.name} holds.")
+                print(f"Points saved: {turn_total}")
+                print(f"Total score: {player.score}")
+
+                if player.score >= self.winning_score:
+                    return True
+
+                return False
+
+            else:
+                print("Invalid choice. Please enter 'r' or 'h'.")
+
+    def play(self):
+        print("\nWelcome to the Pig Dice Game!")
+        print("The first player to reach 100 points wins.")
+
+        while True:
+            for player in self.players:
+                game_over = self.play_turn(player)
+
+                if game_over:
+                    print(f"\nCongratulations, {player.name}! You win!")
+                    print("\nFinal Scores:")
+
+                    for current_player in self.players:
+                        print(
+                            f"{current_player.name}: "
+                            f"{current_player.score}"
+                        )
+
+                    return
+
+
+def main():
+    game = PigGame()
+    game.play()
 
 
 if __name__ == "__main__":
-game = PigGame()
-game.play()
+    main()
